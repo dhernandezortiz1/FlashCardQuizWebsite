@@ -30,7 +30,8 @@
             margin-bottom: 1.5rem;
         }
 
-        .register-container input {
+        .register-container input,
+        .register-container select {
             width: 100%;
             padding: 0.8rem;
             margin-bottom: 1rem;
@@ -67,8 +68,21 @@
     <div class="register-container">
         <h2>Register</h2>
         <form id="registerForm" onsubmit="event.preventDefault(); registerUser();">
+            <input type="text" id="username" placeholder="Username" required>
             <input type="email" id="email" placeholder="Email" required>
             <input type="password" id="password" placeholder="Password" required>
+            <input type="text" id="dob" placeholder="Date of Birth (MM-DD-YYYY)" required>
+            <select id="grade" required>
+                <option value="">Select Grade</option>
+                <option value="6">Grade 6</option>
+                <option value="7">Grade 7</option>
+                <option value="8">Grade 8</option>
+                <option value="9">Grade 9</option>
+                <option value="10">Grade 10</option>
+                <option value="11">Grade 11</option>
+                <option value="12">Grade 12</option>
+                <option value="college">College/University</option>
+            </select>
             <button type="submit">Register</button>
             <div id="error-message" class="error-message"></div>
         </form>
@@ -77,6 +91,7 @@
     <!-- Firebase App and Auth SDKs (non-modular) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
         // Firebase configuration
@@ -93,17 +108,31 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore(); // Initialize Firestore
 
         // Register user function
         async function registerUser() {
+            const username = document.getElementById("username").value;
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
+            const dob = document.getElementById("dob").value;
+            const grade = document.getElementById("grade").value;
             const errorMessage = document.getElementById("error-message");
 
             try {
                 // Attempt to create a new user with email and password
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 console.log("User registered and logged in:", userCredential.user);
+
+                // Store additional user information in Firestore
+                await db.collection("users").doc(userCredential.user.uid).set({
+                    username: username,
+                    email: email,
+                    dateOfBirth: dob,
+                    grade: grade,
+                });
+
+                console.log("User data saved to Firestore");
 
                 // Redirect to home page after successful registration
                 window.location.href = "home.html";
