@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Flashcard Sets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h2,
+        h3 {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .flashcard-set-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .flashcard-set-list button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            text-align: left;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .flashcard-set-list button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Flashcard layout */
+        .flashcard {
+            display: flex;
+            justify-content: space-between;
+            background-color: #fff;
+            padding: 1rem;
+            margin: 1rem 0;
+            width: 800px;
+            height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .flashcard div {
+            width: 48%;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .flashcard div strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Style for creator and set name */
+        #set-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #set-info h3,
+        #set-info p {
+            margin: 0;
+        }
+
+        /* Home and Back button styling */
+        .top-buttons {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .top-buttons a {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .top-buttons a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Home and Back buttons -->
+    <div class="top-buttons">
+        <a href="home.html">Home</a>
+        <a href="#" id="back-btn" style="display: none;">Back</a>
+    </div>
+
+    <h2>Flashcard Sets</h2>
+
+    <!-- List of Flashcard Sets -->
+    <div id="flashcard-set-list" class="flashcard-set-list">
+        <!-- Flashcard set buttons will be added here dynamically -->
+    </div>
+
+    <!-- Flashcard Set Details (this section will be shown after clicking on a set) -->
+    <div id="flashcard-details" style="display: none;">
+        <div id="set-info">
+            <h3 id="set-name"></h3>
+            <p><strong>Created by:</strong> <span id="creator-name"></span></p>
+        </div>
+
+        <div id="flashcards-container">
+            <!-- Flashcards will be displayed here dynamically -->
+        </div>
+    </div>
+
+    <!-- Firebase App and Firestore SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxR-gB1srBMUlQNvwOy1M2fVHIKaClTZs",
+            authDomain: "sweflashcardwebsite.firebaseapp.com",
+            projectId: "sweflashcardwebsite",
+            storageBucket: "sweflashcardwebsite.appspot.com",
+            messagingSenderId: "1017040813605",
+            appId: "1:1017040813605:web:fe254a4afe244d341909cc",
+            measurementId: "G-NHEQY035NK"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Function to load flashcard sets from Firestore
+        async function loadFlashcardSets() {
+            const flashcardSetList = document.getElementById('flashcard-set-list');
+
+            try {
+                const setsSnapshot = await db.collection('flashcardsets').get();
+
+                setsSnapshot.forEach((doc) => {
+                    const setData = doc.data();
+                    const setId = doc.id;
+
+                    const button = document.createElement('button');
+                    button.textContent = setData.name;
+                    button.onclick = () => loadFlashcardSetDetails(setId);
+                    flashcardSetList.appendChild(button);
+                });
+            } catch (error) {
+                console.error("Error loading flashcard sets: ", error);
+            }
+        }
+
+        // Function to load the details of a flashcard set when clicked
+        async function loadFlashcardSetDetails(setId) {
+            const flashcardSetListDiv = document.getElementById('flashcard-set-list');
+            const flashcardDetailsDiv = document.getElementById('flashcard-details');
+            const setNameElement = document.getElementById('set-name');
+            const creatorNameElement = document.getElementById('creator-name');
+            const flashcardsContainer = document.getElementById('flashcards-container');
+            const backBtn = document.getElementById('back-btn');
+
+            // Clear previous flashcard details
+            flashcardsContainer.innerHTML = '';
+
+            try {
+                const setDoc = await db.collection('flashcardsets').doc(setId).get();
+
+                if (setDoc.exists) {
+                    const setData = setDoc.data();
+
+                    // Set the flashcard set name and creator
+                    setNameElement.textContent = setData.name;
+                    creatorNameElement.textContent = await getUsernameByUID(setData.creator);
+
+                    // Hide the list of flashcard sets and show the flashcard details
+                    flashcardSetListDiv.style.display = 'none';
+                    flashcardDetailsDiv.style.display = 'block';
+                    backBtn.style.display = 'inline-block'; // Show the back button
+
+                    // Display each flashcard's front and back
+                    setData.flashcards.forEach((flashcard) => {
+                        const flashcardDiv = document.createElement('div');
+                        flashcardDiv.classList.add('flashcard');
+
+                        flashcardDiv.innerHTML = `
+                            <div><strong>Front:</strong> ${flashcard.front}</div>
+                            <div><strong>Back:</strong> ${flashcard.back}</div>
+                        `;
+
+                        flashcardsContainer.appendChild(flashcardDiv);
+                    });
+                } else {
+                    alert("Flashcard set not found.");
+                }
+            } catch (error) {
+                console.error("Error loading flashcard set details: ", error);
+                alert("Error loading flashcard set details.");
+            }
+        }
+
+        // Function to get a user's username by their UID
+        async function getUsernameByUID(uid) {
+            try {
+                const userDoc = await db.collection('users').doc(uid).get();
+                return userDoc.exists ? userDoc.data().username : "Unknown User";
+            } catch (error) {
+                console.error("Error fetching username: ", error);
+                return "Unknown User";
+            }
+        }
+
+        // Back button functionality
+        document.getElementById('back-btn').onclick = function () {
+            document.getElementById('flashcard-details').style.display = 'none';
+            document.getElementById('flashcard-set-list').style.display = 'block';
+            document.getElementById('back-btn').style.display = 'none';
+        };
+
+        // Check if the user is logged in and load the flashcard sets
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loadFlashcardSets();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Flashcard Set</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #flashcard-set-name,
+        .flashcard-textarea {
+            margin: 1rem 0;
+            padding: 0.5rem;
+            width: 80%;
+            font-size: 1rem;
+        }
+
+        .flashcard {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin: 1rem 0;
+        }
+
+        .flashcard textarea {
+            width: 48%;
+            height: 100px;
+            padding: 0.5rem;
+        }
+
+        .buttons {
+            margin: 1rem 0;
+        }
+
+        .buttons button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            margin: 0.5rem;
+        }
+
+        #new-set-form {
+            display: none;
+        }
+
+        /* Styling for the Home button */
+        #home-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        #home-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Home button -->
+    <a id="home-btn" href="home.html">Home</a>
+
+    <div class="container">
+        <h2>Create Flashcard Set</h2>
+
+        <!-- Initial Button to Create New Set -->
+        <button id="create-new-set-btn">Create New Set</button>
+
+        <!-- Flashcard Set Creation Form -->
+        <div id="new-set-form">
+            <input type="text" id="flashcard-set-name" placeholder="Enter flashcard set name" required />
+
+            <div id="flashcards-container"></div>
+
+            <!-- Buttons to add flashcards and save set -->
+            <div class="buttons">
+                <button id="add-flashcard-btn">Add Flashcard</button>
+                <button id="save-set-btn">Save Flashcard Set</button>
+            </div>
+        </div>
+
+        <div id="message" style="color: red;"></div>
+    </div>
+
+    <!-- Firebase App and Firestore SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxR-gB1srBMUlQNvwOy1M2fVHIKaClTZs",
+            authDomain: "sweflashcardwebsite.firebaseapp.com",
+            projectId: "sweflashcardwebsite",
+            storageBucket: "sweflashcardwebsite.appspot.com",
+            messagingSenderId: "1017040813605",
+            appId: "1:1017040813605:web:fe254a4afe244d341909cc",
+            measurementId: "G-NHEQY035NK"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let flashcardCounter = 0;
+
+        // Show the flashcard creation form when "Create New Set" button is clicked
+        document.getElementById('create-new-set-btn').addEventListener('click', () => {
+            document.getElementById('create-new-set-btn').style.display = 'none';
+            document.getElementById('new-set-form').style.display = 'block';
+        });
+
+        // Add a new flashcard input to the form
+        document.getElementById('add-flashcard-btn').addEventListener('click', () => {
+            const flashcardContainer = document.getElementById('flashcards-container');
+            const flashcardDiv = document.createElement('div');
+            flashcardDiv.classList.add('flashcard');
+            flashcardDiv.innerHTML = `
+                <textarea class="flashcard-textarea" placeholder="Front of flashcard"></textarea>
+                <textarea class="flashcard-textarea" placeholder="Back of flashcard"></textarea>
+            `;
+            flashcardContainer.appendChild(flashcardDiv);
+            flashcardCounter++;
+        });
+
+        // Save the flashcard set to Firestore
+        document.getElementById('save-set-btn').addEventListener('click', async () => {
+            const setName = document.getElementById('flashcard-set-name').value;
+            const flashcards = document.querySelectorAll('.flashcard');
+            const messageDiv = document.getElementById('message');
+
+            if (!setName || flashcards.length === 0) {
+                messageDiv.textContent = "Please enter a set name and add at least one flashcard.";
+                return;
+            }
+
+            const flashcardSet = {
+                name: setName,
+                creator: auth.currentUser ? auth.currentUser.uid : null,
+                flashcards: []
+            };
+
+            flashcards.forEach((flashcard, index) => {
+                const front = flashcard.querySelector('textarea:nth-child(1)').value;
+                const back = flashcard.querySelector('textarea:nth-child(2)').value;
+                if (front && back) {
+                    flashcardSet.flashcards.push({ front, back });
+                }
+            });
+
+            if (flashcardSet.creator) {
+                try {
+                    await db.collection("flashcardsets").add(flashcardSet);
+                    messageDiv.textContent = "Flashcard set saved successfully!";
+                    messageDiv.style.color = "green";
+                    // Optionally clear the form after saving
+                    document.getElementById('flashcards-container').innerHTML = '';
+                    document.getElementById('flashcard-set-name').value = '';
+                } catch (error) {
+                    console.error("Error saving flashcard set: ", error);
+                    messageDiv.textContent = "Error saving flashcard set. Try again.";
+                }
+            } else {
+                messageDiv.textContent = "User not authenticated. Please log in.";
+            }
+        });
+
+        // Check if the user is logged in
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+
+</body>
+
+</html>
