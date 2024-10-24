@@ -20,6 +20,7 @@
         .login-container {
             background-color: #fff;
             padding: 2rem;
+            /* Equal padding on all sides */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 8px;
             width: 300px;
@@ -31,8 +32,10 @@
         }
 
         .login-container input {
-            width: 100%;
+            width: calc(100% - 1.6rem);
+            /* Adjust width for equal spacing */
             padding: 0.8rem;
+            /* Padding inside input boxes */
             margin-bottom: 1rem;
             border: 1px solid #ccc;
             border-radius: 4px;

@@ -53,7 +53,7 @@
             background-color: #0056b3;
         }
 
-        /* Flashcard layout */
+        /* Flashcard layout: two rectangles side by side, 800px wide and 200px tall */
         .flashcard {
             display: flex;
             justify-content: space-between;
@@ -61,7 +61,7 @@
             padding: 1rem;
             margin: 1rem 0;
             width: 800px;
-            height: 300px;
+            height: 250px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -74,9 +74,20 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .flashcard div strong {
-            display: block;
-            margin-bottom: 0.5rem;
+        .flashcard .front {
+            font-weight: bold;
+        }
+
+        .flashcard .back .option {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .correct {
+            background-color: #d4edda !important;
+            /* Highlight correct option in green */
         }
 
         /* Style for creator and set name */
@@ -90,16 +101,11 @@
             margin: 0;
         }
 
-        /* Home and Back button styling */
-        .top-buttons {
+        /* Home button styling */
+        #home-btn {
             position: absolute;
             top: 10px;
             left: 10px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .top-buttons a {
             padding: 0.5rem 1rem;
             background-color: #007bff;
             color: white;
@@ -110,7 +116,26 @@
             text-decoration: none;
         }
 
-        .top-buttons a:hover {
+        #home-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Back button styling */
+        #back-btn {
+            position: absolute;
+            top: 10px;
+            left: 90px;
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        #back-btn:hover {
             background-color: #0056b3;
         }
     </style>
@@ -118,11 +143,9 @@
 
 <body>
 
-    <!-- Home and Back buttons -->
-    <div class="top-buttons">
-        <a href="home.html">Home</a>
-        <a href="#" id="back-btn" style="display: none;">Back</a>
-    </div>
+    <!-- Home button -->
+    <a id="home-btn" href="home.html">Home</a>
+    <a id="back-btn" style="display: none;" href="javascript:void(0)" onclick="showFlashcardSets()">Back</a>
 
     <h2>Flashcard Sets</h2>
 
@@ -193,7 +216,6 @@
             const setNameElement = document.getElementById('set-name');
             const creatorNameElement = document.getElementById('creator-name');
             const flashcardsContainer = document.getElementById('flashcards-container');
-            const backBtn = document.getElementById('back-btn');
 
             // Clear previous flashcard details
             flashcardsContainer.innerHTML = '';
@@ -211,20 +233,38 @@
                     // Hide the list of flashcard sets and show the flashcard details
                     flashcardSetListDiv.style.display = 'none';
                     flashcardDetailsDiv.style.display = 'block';
-                    backBtn.style.display = 'inline-block'; // Show the back button
+                    document.getElementById('back-btn').style.display = 'block';
 
-                    // Display each flashcard's front and back
+                    // Display each flashcard's front and back with the correct option highlighted
                     setData.flashcards.forEach((flashcard) => {
                         const flashcardDiv = document.createElement('div');
                         flashcardDiv.classList.add('flashcard');
 
-                        flashcardDiv.innerHTML = `
-                            <div><strong>Front:</strong> ${flashcard.front}</div>
-                            <div><strong>Back:</strong> ${flashcard.back}</div>
-                        `;
+                        const frontDiv = document.createElement('div');
+                        frontDiv.classList.add('front');
+                        frontDiv.innerHTML = `<strong>Front:</strong> ${flashcard.front}`;
+
+                        const backDiv = document.createElement('div');
+                        backDiv.classList.add('back');
+                        backDiv.innerHTML = `<strong>Back (Options):</strong>`;
+
+                        // Display all the options with the correct one highlighted
+                        flashcard.back.forEach((option) => {
+                            const optionDiv = document.createElement('div');
+                            optionDiv.classList.add('option');
+                            if (option.isCorrect) {
+                                optionDiv.classList.add('correct');
+                            }
+                            optionDiv.textContent = option.option;
+                            backDiv.appendChild(optionDiv);
+                        });
+
+                        flashcardDiv.appendChild(frontDiv);
+                        flashcardDiv.appendChild(backDiv);
 
                         flashcardsContainer.appendChild(flashcardDiv);
                     });
+
                 } else {
                     alert("Flashcard set not found.");
                 }
@@ -238,28 +278,23 @@
         async function getUsernameByUID(uid) {
             try {
                 const userDoc = await db.collection('users').doc(uid).get();
-                return userDoc.exists ? userDoc.data().username : "Unknown User";
+                return userDoc.exists ? userDoc.data().username : "Unknown";
             } catch (error) {
                 console.error("Error fetching username: ", error);
-                return "Unknown User";
+                return "Unknown";
             }
         }
 
-        // Back button functionality
-        document.getElementById('back-btn').onclick = function () {
-            document.getElementById('flashcard-details').style.display = 'none';
+        // Show the list of flashcard sets and hide flashcard details
+        function showFlashcardSets() {
             document.getElementById('flashcard-set-list').style.display = 'block';
+            document.getElementById('flashcard-details').style.display = 'none';
             document.getElementById('back-btn').style.display = 'none';
-        };
+        }
 
-        // Check if the user is logged in and load the flashcard sets
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                loadFlashcardSets();
-            } else {
-                window.location.href = "index.html";
-            }
-        });
+        // Load the flashcard sets when the page loads
+        window.onload = loadFlashcardSets;
+
     </script>
 
 </body>

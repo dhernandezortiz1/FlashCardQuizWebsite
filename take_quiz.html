@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h2 {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .flashcard-set-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .flashcard-set-list button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            text-align: left;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .flashcard-set-list button:hover {
+            background-color: #0056b3;
+        }
+
+        .quiz-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .options {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .option-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 5px 0;
+            width: 200px;
+        }
+
+        .option-button:hover {
+            background-color: #218838;
+        }
+
+        /* Next Question button styling */
+        #next-button {
+            background-color: #ffc107;
+            /* Yellow color */
+            color: black;
+            border: none;
+            border-radius: 4px;
+            padding: 15px 30px;
+            /* Larger padding */
+            font-size: 1.2rem;
+            /* Larger font size */
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+            /* Hidden by default */
+        }
+
+        #next-button:hover {
+            background-color: #e0a800;
+            /* Darker yellow on hover */
+        }
+
+        /* Home button styling */
+        #home-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        #home-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Result and retry buttons styling */
+        #try-again-button,
+        #other-quiz-button {
+            display: none;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 5px;
+            width: 200px;
+        }
+
+        #try-again-button:hover,
+        #other-quiz-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Home button -->
+    <a id="home-btn" href="home.html">Home</a>
+
+    <h2 id="quiz-title">Select a Flashcard Set</h2>
+
+    <!-- List of Flashcard Sets -->
+    <div id="flashcard-set-list" class="flashcard-set-list">
+        <!-- Flashcard set buttons will be added here dynamically -->
+    </div>
+
+    <!-- Quiz Container -->
+    <div id="quiz-container" class="quiz-container">
+        <h2 id="question"></h2>
+        <div id="options" class="options">
+            <!-- Options will be added here dynamically -->
+        </div>
+        <button id="next-button">Next Question</button>
+        <h2 id="result" style="display: none;"></h2> <!-- Display result at the end -->
+        <button id="try-again-button">Try Again</button>
+        <button id="other-quiz-button">Other Quiz</button>
+    </div>
+
+    <!-- Firebase App and Firestore SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxR-gB1srBMUlQNvwOy1M2fVHIKaClTZs",
+            authDomain: "sweflashcardwebsite.firebaseapp.com",
+            projectId: "sweflashcardwebsite",
+            storageBucket: "sweflashcardwebsite.appspot.com",
+            messagingSenderId: "1017040813605",
+            appId: "1:1017040813605:web:fe254a4afe244d341909cc",
+            measurementId: "G-NHEQY035NK"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let currentFlashcards = [];
+        let currentQuestionIndex = 0;
+        let score = 0; // Initialize score
+
+        // Function to load flashcard sets from Firestore
+        async function loadFlashcardSets() {
+            const flashcardSetList = document.getElementById('flashcard-set-list');
+
+            try {
+                const setsSnapshot = await db.collection('flashcardsets').get();
+
+                setsSnapshot.forEach((doc) => {
+                    const setData = doc.data();
+                    const setId = doc.id;
+
+                    const button = document.createElement('button');
+                    button.textContent = setData.name;
+                    button.onclick = () => startQuiz(setId);
+                    flashcardSetList.appendChild(button);
+                });
+            } catch (error) {
+                console.error("Error loading flashcard sets: ", error);
+            }
+        }
+
+        // Function to start quiz based on selected flashcard set
+        async function startQuiz(setId) {
+            // Clear the title and load the flashcards for the selected set
+            document.getElementById('quiz-title').style.display = 'none'; // Remove title
+            const flashcardSetList = document.getElementById('flashcard-set-list');
+            flashcardSetList.style.display = 'none'; // Hide the flashcard list
+
+            try {
+                const setDoc = await db.collection('flashcardsets').doc(setId).get();
+                const setData = setDoc.data();
+
+                if (setData && setData.flashcards) {
+                    currentFlashcards = setData.flashcards;
+                    currentQuestionIndex = 0; // Reset the question index
+                    score = 0; // Reset score at the beginning of the quiz
+
+                    // Show quiz container
+                    document.getElementById('quiz-container').style.display = 'flex';
+                    showQuestion();
+                }
+            } catch (error) {
+                console.error("Error loading flashcard set details: ", error);
+                alert("Error loading flashcard set details.");
+            }
+        }
+
+        // Function to shuffle the options array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+        }
+
+        // Function to show the current question
+        function showQuestion() {
+            const questionElement = document.getElementById('question');
+            const optionsContainer = document.getElementById('options');
+            const nextButton = document.getElementById('next-button');
+
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+
+            if (currentQuestionIndex < currentFlashcards.length) {
+                const flashcard = currentFlashcards[currentQuestionIndex];
+                questionElement.textContent = flashcard.front;
+
+                // Clone the options array
+                const options = flashcard.back.slice();
+                shuffle(options); // Shuffle the cloned array
+
+                // Display options from the "option" field of each back item
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option.option; // Access the option text
+                    button.classList.add('option-button');
+                    button.onclick = () => selectOption(option.isCorrect);
+                    optionsContainer.appendChild(button);
+                });
+
+                nextButton.style.display = 'none'; // Hide the next button until an option is selected
+                questionElement.style.display = 'block';
+                optionsContainer.style.display = 'flex'; // Show options
+                nextButton.style.display = 'none'; // Hide the next button initially
+            } else {
+                displayResults(); // Show results if no more questions
+            }
+        }
+
+        // Function to handle option selection
+        function selectOption(isCorrect) {
+            if (isCorrect) {
+                score++; // Increment score if correct
+            }
+            currentQuestionIndex++;
+            showQuestion(); // Show the next question
+        }
+
+        // Function to display the results
+        function displayResults() {
+            const questionElement = document.getElementById('question');
+            const optionsContainer = document.getElementById('options');
+            const nextButton = document.getElementById('next-button');
+            const resultElement = document.getElementById('result');
+            const tryAgainButton = document.getElementById('try-again-button');
+            const otherQuizButton = document.getElementById('other-quiz-button');
+
+            // Clear and hide the question and options
+            questionElement.style.display = 'none';
+            optionsContainer.style.display = 'none';
+            nextButton.style.display = 'none';
+
+            const totalQuestions = currentFlashcards.length;
+            resultElement.textContent = `Quiz Finished! You got ${score} out of ${totalQuestions} correct. Your score is ${Math.round((score / totalQuestions) * 100)}%.`;
+            resultElement.style.display = 'block'; // Show the result
+
+            // Show the buttons for trying again or going to other quizzes
+            tryAgainButton.style.display = 'block';
+            otherQuizButton.style.display = 'block';
+
+            // Add event listeners to the buttons
+            tryAgainButton.onclick = () => {
+                resetQuiz(); // Reset the quiz using the new function
+            };
+
+            otherQuizButton.onclick = () => {
+                // Go back to the flashcard set list
+                document.getElementById('quiz-title').style.display = 'block'; // Show title
+                const flashcardSetList = document.getElementById('flashcard-set-list');
+                flashcardSetList.style.display = 'block'; // Show flashcard list
+                document.getElementById('quiz-container').style.display = 'none'; // Hide quiz container
+                resultElement.style.display = 'none'; // Hide result
+                tryAgainButton.style.display = 'none'; // Hide try again button
+                otherQuizButton.style.display = 'none'; // Hide other quiz button
+            };
+        }
+
+        // Function to reset the quiz state
+        function resetQuiz() {
+            currentQuestionIndex = 0; // Reset question index
+            score = 0; // Reset score
+            const resultElement = document.getElementById('result');
+
+            // Clear the result display
+            resultElement.style.display = 'none';
+            document.getElementById('try-again-button').style.display = 'none'; // Hide try again button
+            document.getElementById('other-quiz-button').style.display = 'none'; // Hide other quiz button
+
+            // Show quiz container
+            document.getElementById('quiz-container').style.display = 'flex';
+            showQuestion(); // Restart the quiz
+        }
+
+        // Load flashcard sets when the page is ready
+        loadFlashcardSets();
+    </script>
+</body>
+
+</html>
