@@ -5,76 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <style>
-        /* CSS Styling */
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-        }
-
-        .home-container {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        h2 {
-            margin-bottom: 1.5rem;
-        }
-
-        /* Centering the button container */
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            width: 200px;
-            margin-top: 20px;
-            /* Add margin to separate from text */
-        }
-
-        .button-container button {
-            width: 100%;
-            padding: 0.8rem;
-            font-size: 1rem;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .view-btn {
-            background-color: #007bff;
-        }
-
-        .create-btn {
-            background-color: #28a745;
-        }
-
-        .quiz-btn {
-            background-color: #ffc107;
-            color: #333;
-        }
-
-        .view-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .create-btn:hover {
-            background-color: #218838;
-        }
-
-        .quiz-btn:hover {
-            background-color: #e0a800;
-        }
-    </style>
+    <link rel="stylesheet" href="home.css">
 </head>
 
 <body>
+
+    <!-- Logout Button -->
+    <div class="logout-container">
+        <button id="logout-btn" onclick="logout()">Logout</button>
+    </div>
 
     <div class="home-container">
         <h2 id="welcome-message">Welcome to Flash Card Quiz Web App!</h2>
@@ -95,7 +34,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration and authentication scripts
         const firebaseConfig = {
             apiKey: "AIzaSyBxR-gB1srBMUlQNvwOy1M2fVHIKaClTZs",
             authDomain: "sweflashcardwebsite.firebaseapp.com",
@@ -111,28 +50,22 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Function to check the authentication state
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // User is signed in, load user data
                 loadUserData();
             } else {
                 console.log("No user signed in.");
-                // No user is signed in, redirect to login page after a short delay
                 setTimeout(() => {
-                    window.location.href = "index.html"; // Redirect to login page
-                }, 3000); // Redirect after 3 seconds
+                    window.location.href = "index.html";
+                }, 3000);
             }
         });
 
-        // Function to get the user's data and update the welcome message
         async function loadUserData() {
             const user = auth.currentUser;
-
             if (user) {
                 try {
                     const userDoc = await db.collection("users").doc(user.uid).get();
-
                     if (userDoc.exists) {
                         const userData = userDoc.data();
                         const welcomeMessage = document.getElementById("welcome-message");
@@ -145,7 +78,37 @@
                 }
             }
         }
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = "index.html"; // Redirect to login page after logout
+            }).catch((error) => {
+                console.error("Error during logout:", error);
+            });
+        }
     </script>
+
+    <style>
+        /* Logout button styling */
+        .logout-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        #logout-btn {
+            padding: 10px 20px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #logout-btn:hover {
+            background-color: #e60000;
+        }
+    </style>
 
 </body>
 

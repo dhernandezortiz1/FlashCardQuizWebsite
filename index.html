@@ -5,82 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <style>
-        /* CSS Styling */
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-        }
-
-        .login-container {
-            background-color: #fff;
-            padding: 2rem;
-            /* Equal padding on all sides */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            width: 300px;
-            text-align: center;
-        }
-
-        .login-container h2 {
-            margin-bottom: 1.5rem;
-        }
-
-        .login-container input {
-            width: calc(100% - 1.6rem);
-            /* Adjust width for equal spacing */
-            padding: 0.8rem;
-            /* Padding inside input boxes */
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .login-container button {
-            width: 100%;
-            padding: 0.8rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        .login-btn {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .login-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .register-btn {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .register-btn:hover {
-            background-color: #5a6268;
-        }
-
-        .error-message {
-            color: red;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
@@ -101,11 +26,9 @@
 
     <!-- Firebase App and Firebase Auth SDK -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBxR-gB1srBMUlQNvwOy1M2fVHIKaClTZs",
             authDomain: "sweflashcardwebsite.firebaseapp.com",
@@ -116,22 +39,18 @@
             measurementId: "G-NHEQY035NK"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Function to log in user
-        window.loginUser = async function () { // Make loginUser accessible globally
+        window.loginUser = async function () {
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
             const errorMessage = document.getElementById("error-message");
 
             try {
-                // Attempt to sign in with email and password
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log("User logged in:", userCredential.user);
 
-                // Redirect to home page after successful login
                 window.location.href = "home.html";
             } catch (error) {
                 console.error("Error logging in user:", error);

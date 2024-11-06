@@ -5,156 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Flashcard Sets</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        h2,
-        h3 {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .flashcard-set-list {
-            max-height: 300px;
-            overflow-y: auto;
-            background-color: #fff;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 600px;
-            margin-bottom: 20px;
-        }
-
-        .flashcard-set-list button {
-            display: block;
-            width: 100%;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            text-align: left;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        .flashcard-set-list button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Flashcard layout: two rectangles side by side, 800px wide and 200px tall */
-        .flashcard {
-            display: flex;
-            justify-content: space-between;
-            background-color: #fff;
-            padding: 1rem;
-            margin: 1rem 0;
-            width: 800px;
-            height: 250px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .flashcard div {
-            width: 48%;
-            padding: 1rem;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .flashcard .front {
-            font-weight: bold;
-        }
-
-        .flashcard .back .option {
-            padding: 0.5rem;
-            margin: 0.5rem 0;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-        }
-
-        .correct {
-            background-color: #d4edda !important;
-            /* Highlight correct option in green */
-        }
-
-        /* Style for creator and set name */
-        #set-info {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        #set-info h3,
-        #set-info p {
-            margin: 0;
-        }
-
-        /* Home button styling */
-        #home-btn {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 0.5rem 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        #home-btn:hover {
-            background-color: #0056b3;
-        }
-
-        /* Back button styling */
-        #back-btn {
-            position: absolute;
-            top: 10px;
-            left: 90px;
-            padding: 0.5rem 1rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        #back-btn:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <link rel="stylesheet" href="view_flashcards.css">
 </head>
 
 <body>
-
     <!-- Home button -->
     <a id="home-btn" href="home.html">Home</a>
-    <a id="back-btn" style="display: none;" href="javascript:void(0)" onclick="showFlashcardSets()">Back</a>
+    <a id="back-btn" style="display: none;" href="javascript:void(0)" onclick="showSubjects()">Back</a>
 
     <h2>Flashcard Sets</h2>
 
+    <!-- Subject Boxes -->
+    <div id="subject-list" class="subject-list">
+        <button onclick="loadFlashcardSetsBySubject('math')">Math</button>
+        <button onclick="loadFlashcardSetsBySubject('science')">Science</button>
+        <button onclick="loadFlashcardSetsBySubject('social studies')">Social Studies</button>
+        <button onclick="loadFlashcardSetsBySubject('languages')">Languages</button>
+        <button onclick="loadFlashcardSetsBySubject('other')">Other</button>
+    </div>
+
     <!-- List of Flashcard Sets -->
-    <div id="flashcard-set-list" class="flashcard-set-list">
+    <div id="flashcard-set-list" style="display: none;">
         <!-- Flashcard set buttons will be added here dynamically -->
     </div>
 
-    <!-- Flashcard Set Details (this section will be shown after clicking on a set) -->
+    <!-- Flashcard Set Details -->
     <div id="flashcard-details" style="display: none;">
         <div id="set-info">
             <h3 id="set-name"></h3>
@@ -172,7 +47,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBxR-gB1srBMUlQNvwOy1M2fVHIKaClTZs",
             authDomain: "sweflashcardwebsite.firebaseapp.com",
@@ -183,59 +57,61 @@
             measurementId: "G-NHEQY035NK"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Function to load flashcard sets from Firestore
-        async function loadFlashcardSets() {
+        // Load flashcard sets for the selected subject
+        async function loadFlashcardSetsBySubject(subject) {
             const flashcardSetList = document.getElementById('flashcard-set-list');
+            flashcardSetList.innerHTML = ''; // Clear previous sets
+            document.getElementById('subject-list').style.display = 'none';
+            flashcardSetList.style.display = 'block';
+            document.getElementById('back-btn').style.display = 'block';
 
             try {
-                const setsSnapshot = await db.collection('flashcardsets').get();
+                const setsSnapshot = await db.collection('flashcardsets').doc(subject).collection('sets').get();
 
-                setsSnapshot.forEach((doc) => {
-                    const setData = doc.data();
-                    const setId = doc.id;
+                if (setsSnapshot.empty) {
+                    flashcardSetList.innerHTML = `<p>No flashcard sets found for ${subject}.</p>`;
+                } else {
+                    setsSnapshot.forEach((doc) => {
+                        const setData = doc.data();
+                        const setId = doc.id;
 
-                    const button = document.createElement('button');
-                    button.textContent = setData.name;
-                    button.onclick = () => loadFlashcardSetDetails(setId);
-                    flashcardSetList.appendChild(button);
-                });
+                        const button = document.createElement('button');
+                        button.textContent = setData.name;
+                        button.onclick = () => loadFlashcardSetDetails(subject, setId);
+                        flashcardSetList.appendChild(button);
+                    });
+                }
             } catch (error) {
-                console.error("Error loading flashcard sets: ", error);
+                console.error("Error loading flashcard sets for subject:", error);
             }
         }
 
-        // Function to load the details of a flashcard set when clicked
-        async function loadFlashcardSetDetails(setId) {
+        // Load details of a flashcard set
+        async function loadFlashcardSetDetails(subject, setId) {
             const flashcardSetListDiv = document.getElementById('flashcard-set-list');
             const flashcardDetailsDiv = document.getElementById('flashcard-details');
             const setNameElement = document.getElementById('set-name');
             const creatorNameElement = document.getElementById('creator-name');
             const flashcardsContainer = document.getElementById('flashcards-container');
 
-            // Clear previous flashcard details
-            flashcardsContainer.innerHTML = '';
+            flashcardsContainer.innerHTML = ''; // Clear previous flashcard details
 
             try {
-                const setDoc = await db.collection('flashcardsets').doc(setId).get();
+                const setDoc = await db.collection('flashcardsets').doc(subject).collection('sets').doc(setId).get();
 
                 if (setDoc.exists) {
                     const setData = setDoc.data();
 
-                    // Set the flashcard set name and creator
                     setNameElement.textContent = setData.name;
                     creatorNameElement.textContent = await getUsernameByUID(setData.creator);
 
-                    // Hide the list of flashcard sets and show the flashcard details
                     flashcardSetListDiv.style.display = 'none';
                     flashcardDetailsDiv.style.display = 'block';
-                    document.getElementById('back-btn').style.display = 'block';
 
-                    // Display each flashcard's front and back with the correct option highlighted
                     setData.flashcards.forEach((flashcard) => {
                         const flashcardDiv = document.createElement('div');
                         flashcardDiv.classList.add('flashcard');
@@ -248,7 +124,6 @@
                         backDiv.classList.add('back');
                         backDiv.innerHTML = `<strong>Back (Options):</strong>`;
 
-                        // Display all the options with the correct one highlighted
                         flashcard.back.forEach((option) => {
                             const optionDiv = document.createElement('div');
                             optionDiv.classList.add('option');
@@ -261,7 +136,6 @@
 
                         flashcardDiv.appendChild(frontDiv);
                         flashcardDiv.appendChild(backDiv);
-
                         flashcardsContainer.appendChild(flashcardDiv);
                     });
 
@@ -269,34 +143,32 @@
                     alert("Flashcard set not found.");
                 }
             } catch (error) {
-                console.error("Error loading flashcard set details: ", error);
-                alert("Error loading flashcard set details.");
+                console.error("Error loading flashcard set details:", error);
             }
         }
 
-        // Function to get a user's username by their UID
+        // Fetch username by UID
         async function getUsernameByUID(uid) {
             try {
                 const userDoc = await db.collection('users').doc(uid).get();
                 return userDoc.exists ? userDoc.data().username : "Unknown";
             } catch (error) {
-                console.error("Error fetching username: ", error);
+                console.error("Error fetching username:", error);
                 return "Unknown";
             }
         }
 
-        // Show the list of flashcard sets and hide flashcard details
-        function showFlashcardSets() {
-            document.getElementById('flashcard-set-list').style.display = 'block';
+        // Show the subject list and hide other views
+        function showSubjects() {
+            document.getElementById('subject-list').style.display = 'block';
+            document.getElementById('flashcard-set-list').style.display = 'none';
             document.getElementById('flashcard-details').style.display = 'none';
             document.getElementById('back-btn').style.display = 'none';
         }
 
-        // Load the flashcard sets when the page loads
-        window.onload = loadFlashcardSets;
-
+        // Load subjects when page loads
+        window.onload = showSubjects;
     </script>
-
 </body>
 
 </html>

@@ -5,64 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <style>
-        /* CSS Styling */
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-        }
-
-        .register-container {
-            background-color: #fff;
-            padding: 2rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            width: 300px;
-            text-align: center;
-        }
-
-        .register-container h2 {
-            margin-bottom: 1.5rem;
-        }
-
-        .register-container input,
-        .register-container select {
-            width: calc(100% - 1.6rem);
-            /* Adjust width for equal spacing */
-            padding: 0.8rem;
-            /* Padding inside input boxes */
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .register-container button {
-            width: 100%;
-            padding: 0.8rem;
-            border: none;
-            background-color: #28a745;
-            color: white;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        .register-container button:hover {
-            background-color: #218838;
-        }
-
-        .error-message {
-            color: red;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="register.css">
 </head>
 
 <body>
@@ -96,7 +39,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <script>
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBxR-gB1srBMUlQNvwOy1M2fVHIKaClTZs",
             authDomain: "sweflashcardwebsite.firebaseapp.com",
@@ -107,12 +49,10 @@
             measurementId: "G-NHEQY035NK"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const db = firebase.firestore(); // Initialize Firestore
+        const db = firebase.firestore();
 
-        // Register user function
         async function registerUser() {
             const username = document.getElementById("username").value;
             const email = document.getElementById("email").value;
@@ -122,11 +62,9 @@
             const errorMessage = document.getElementById("error-message");
 
             try {
-                // Attempt to create a new user with email and password
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 console.log("User registered and logged in:", userCredential.user);
 
-                // Store additional user information in Firestore
                 await db.collection("users").doc(userCredential.user.uid).set({
                     username: username,
                     email: email,
@@ -136,7 +74,6 @@
 
                 console.log("User data saved to Firestore");
 
-                // Redirect to home page after successful registration
                 window.location.href = "home.html";
             } catch (error) {
                 console.error("Error registering user:", error);
