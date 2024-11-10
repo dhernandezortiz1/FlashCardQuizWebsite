@@ -1,4 +1,4 @@
-/* CSS Styling for home.html */
+/* Basic body styling */
 body {
     display: flex;
     flex-direction: column;
@@ -11,33 +11,82 @@ body {
     color: white;
 }
 
-.home-container {
-    text-align: center;
-    padding: 2rem;
-}
-
-h2 {
-    margin-bottom: 1.5rem;
-}
-
-.button-container {
+/* Top-left container for icon and welcome text */
+.top-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    width: 200px;
-    margin-top: 20px;
+    align-items: center;
 }
 
-.button-container button {
-    width: 100%;
-    padding: 0.8rem;
-    font-size: 1rem;
+.user-icon {
+    width: 60px;
+    height: 60px;
+    background-color: grey;
+    /* Default color */
     color: white;
-    border: none;
-    border-radius: 4px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-right: 10px;
     cursor: pointer;
 }
 
+.user-icon:hover {
+    opacity: 0.8;
+    /* Visual feedback on hover */
+}
+
+.welcome-text {
+    font-size: 18px;
+}
+
+/* Centered website title */
+.website-title {
+    text-align: center;
+    margin-top: 60px;
+}
+
+.website-title h1 {
+    font-size: 3rem;
+    margin: 0;
+}
+
+/* 2x2 grid layout for button container */
+.button-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    /* Increase gap between buttons */
+    width: 500px;
+    /* Make the container wider */
+    margin-top: 40px;
+}
+
+/* Equal height and width buttons */
+.button-container button {
+    padding: 2rem;
+    /* Increase padding for bigger buttons */
+    font-size: 1.4rem;
+    /* Make font larger for bigger buttons */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    height: 100px;
+    /* Increase button height */
+    width: 100%;
+    /* Ensure buttons take full width of the grid column */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Button specific background colors */
 .view-btn {
     background-color: #007bff;
 }
@@ -61,4 +110,39 @@ h2 {
 
 .quiz-btn:hover {
     background-color: #e0a800;
+}
+
+/* Logout button styling */
+.logout-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+#logout-btn {
+    padding: 10px 20px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#logout-btn:hover {
+    background-color: #e60000;
+}
+
+.profile-btn {
+    padding: 10px 20px;
+    background-color: #808080;
+    /* Grey color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.profile-btn:hover {
+    background-color: #6b6b6b;
+    /* Darker grey when hovered */
 }

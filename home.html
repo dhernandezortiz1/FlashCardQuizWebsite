@@ -15,17 +15,28 @@
         <button id="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <div class="home-container">
-        <h2 id="welcome-message">Welcome to Flash Card Quiz Web App!</h2>
-        <h4>By team Vision</h4>
+    <!-- Top Left: User Icon and Welcome Text -->
+    <div class="top-left">
+        <!-- User Icon Circle -->
+        <div class="user-icon" id="user-icon" onclick="window.location.href='view_profile.html'">
+            <span class="icon-text">U</span> <!-- Default icon text -->
+        </div>
+        <div class="welcome-text" id="welcome-message">
+            <!-- Will be populated dynamically -->
+        </div>
     </div>
 
-    <!-- Button container centered on the page -->
+    <!-- Website Title (Centered) -->
+    <div class="website-title">
+        <h1>Flash Focus</h1>
+    </div>
+
+    <!-- Button container (2x2 grid) -->
     <div class="button-container">
-        <button class="view-btn" onclick="window.location.href='view_flashcards.html'">View Flash Card Sets</button>
-        <button class="create-btn" onclick="window.location.href='create_flashcards.html'">Create Flash Card
-            Set</button>
+        <button class="view-btn" onclick="window.location.href='view_flashcards.html'">View Flashcards</button>
+        <button class="create-btn" onclick="window.location.href='create_flashcards.html'">Create Flashcards</button>
         <button class="quiz-btn" onclick="window.location.href='take_quiz.html'">Take Quiz</button>
+        <button class="profile-btn" onclick="window.location.href='view_profile.html'">View Profile</button>
     </div>
 
     <!-- Firebase App and Auth SDKs (non-modular) -->
@@ -69,7 +80,11 @@
                     if (userDoc.exists) {
                         const userData = userDoc.data();
                         const welcomeMessage = document.getElementById("welcome-message");
-                        welcomeMessage.textContent = `Welcome ${userData.username}, to Flash Focus!`;
+                        welcomeMessage.textContent = `Welcome ${userData.username}`;
+
+                        // Get the user's icon color from Firestore or default to grey
+                        const userColor = userData.color || 'grey';
+                        document.getElementById("user-icon").style.backgroundColor = userColor;
                     } else {
                         console.error("No such user document!");
                     }
@@ -87,28 +102,6 @@
             });
         }
     </script>
-
-    <style>
-        /* Logout button styling */
-        .logout-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-
-        #logout-btn {
-            padding: 10px 20px;
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #logout-btn:hover {
-            background-color: #e60000;
-        }
-    </style>
 
 </body>
 

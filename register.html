@@ -16,7 +16,15 @@
             <input type="text" id="username" placeholder="Username" required>
             <input type="email" id="email" placeholder="Email" required>
             <input type="password" id="password" placeholder="Password" required>
-            <input type="text" id="dob" placeholder="Date of Birth (MM-DD-YYYY)" required>
+
+            <!-- Separate fields for Date of Birth -->
+            <div class="dob-container">
+                <label for="dob-month">Date of Birth:</label>
+                <input type="number" id="dob-month" placeholder="MM" min="1" max="12" required>
+                <input type="number" id="dob-day" placeholder="DD" min="1" max="31" required>
+                <input type="number" id="dob-year" placeholder="YYYY" min="1900" max="2100" required>
+            </div>
+
             <select id="grade" required>
                 <option value="">Select Grade</option>
                 <option value="6">Grade 6</option>
@@ -57,7 +65,10 @@
             const username = document.getElementById("username").value;
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
-            const dob = document.getElementById("dob").value;
+            const month = document.getElementById("dob-month").value.padStart(2, '0');
+            const day = document.getElementById("dob-day").value.padStart(2, '0');
+            const year = document.getElementById("dob-year").value;
+            const dob = `${month}-${day}-${year}`; // Combine month, day, and year into "MM-DD-YYYY"
             const grade = document.getElementById("grade").value;
             const errorMessage = document.getElementById("error-message");
 

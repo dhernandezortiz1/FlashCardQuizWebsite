@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Profile</title>
+    <link rel="stylesheet" href="view_profile.css">
+</head>
+
+<body>
+
+    <!-- Home button -->
+    <a id="home-btn" href="home.html">Home</a>
+
+    <!-- Logout button -->
+    <button id="logout-btn">Logout</button>
+
+    <!-- Profile Container -->
+    <div class="profile-container">
+        <h2>User Profile</h2>
+
+        <!-- User Icon Circle -->
+        <div class="user-icon" id="user-icon" onclick="showColorPicker()">
+            <span class="icon-text">U</span> <!-- Default icon text -->
+        </div>
+
+        <p><strong>Username:</strong> <span id="username">Loading...</span></p>
+        <p><strong>Email:</strong> <span id="email">Loading...</span></p>
+        <p><strong>Date of Birth:</strong> <span id="dob">Loading...</span></p>
+        <p><strong>Grade:</strong> <span id="grade">Loading...</span></p>
+    </div>
+
+    <!-- Color Picker Popup -->
+    <div id="color-picker" class="color-picker-popup">
+        <h3 style="color: black;">Change icon color</h3>
+        <div class="color-options">
+            <div class="color-option" style="background-color: blue;" onclick="changeColor('blue')"></div>
+            <div class="color-option" style="background-color: red;" onclick="changeColor('red')"></div>
+            <div class="color-option" style="background-color: green;" onclick="changeColor('green')"></div>
+            <div class="color-option" style="background-color: yellow;" onclick="changeColor('yellow')"></div>
+            <div class="color-option" style="background-color: orange;" onclick="changeColor('orange')"></div>
+            <div class="color-option" style="background-color: pink;" onclick="changeColor('pink')"></div>
+            <div class="color-option" style="background-color: black;" onclick="changeColor('black')"></div>
+            <div class="color-option" style="background-color: purple;" onclick="changeColor('purple')"></div>
+        </div>
+    </div>
+
+    <!-- Firebase App and Auth SDKs (non-modular) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Firebase configuration and authentication scripts
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxR-gB1srBMUlQNvwOy1M2fVHIKaClTZs",
+            authDomain: "sweflashcardwebsite.firebaseapp.com",
+            projectId: "sweflashcardwebsite",
+            storageBucket: "sweflashcardwebsite.appspot.com",
+            messagingSenderId: "1017040813605",
+            appId: "1:1017040813605:web:fe254a4afe244d341909cc",
+            measurementId: "G-NHEQY035NK"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await db.collection("users").doc(user.uid).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        document.getElementById("username").textContent = userData.username;
+                        document.getElementById("email").textContent = userData.email;
+                        document.getElementById("dob").textContent = userData.dateOfBirth || 'Not provided';
+                        document.getElementById("grade").textContent = userData.grade;
+
+                        // Check if the color field exists, otherwise default to grey
+                        const userColor = userData.color || 'grey';
+                        document.getElementById("user-icon").style.backgroundColor = userColor;
+                    } else {
+                        console.error("No such user document!");
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            } else {
+                alert("User not logged in.");
+                window.location.href = "index.html";
+            }
+        });
+
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            auth.signOut().then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                console.error("Error signing out:", error);
+            });
+        });
+
+        // Show the color picker popup
+        function showColorPicker() {
+            const colorPicker = document.getElementById("color-picker");
+            colorPicker.style.display = "block"; // Show the color picker
+        }
+
+        // Change the color of the icon and save it to Firestore
+        function changeColor(color) {
+            const userIcon = document.getElementById("user-icon");
+            userIcon.style.backgroundColor = color; // Change the background color of the user icon
+            const colorPicker = document.getElementById("color-picker");
+            colorPicker.style.display = "none"; // Hide the color picker after selection
+
+            // Get the current user and update their color in Firestore
+            const user = auth.currentUser;
+            if (user) {
+                db.collection("users").doc(user.uid).update({
+                    color: color
+                }).then(() => {
+                    console.log("User color updated to:", color);
+                }).catch((error) => {
+                    console.error("Error updating user color:", error);
+                });
+            }
+        }
+    </script>
+
+</body>
+
+</html>

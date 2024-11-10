@@ -13,13 +13,13 @@
     <!-- Home button -->
     <a id="home-btn" href="home.html">Home</a>
 
-    <h2>Create a Flashcard Set</h2>
+    <h2 style="color: white;">Create a Flashcard Set</h2>
 
     <form id="flashcard-set-form">
-        <label for="set-name">Flashcard Set Name:</label>
+        <label for="set-name" style="color: white;">Flashcard Set Name:</label>
         <input type="text" id="set-name" placeholder="Enter set name" required>
 
-        <label for="subject">Subject:</label>
+        <label for="subject" style="color: white;">Subject:</label>
         <select id="subject" required>
             <option value="math">Math</option>
             <option value="science">Science</option>
@@ -30,12 +30,12 @@
 
         <div class="flashcard-container">
             <div>
-                <label for="flashcard-front">Flashcard Front:</label>
+                <label for="flashcard-front" style="color: black;">Flashcard Front:</label>
                 <textarea id="flashcard-front" placeholder="Enter the question or term" required></textarea>
             </div>
 
             <div>
-                <label>Flashcard Back (Multiple Choice):</label>
+                <label style="color: black;">Flashcard Back (Multiple Choice):</label>
                 <div class="option-container">
                     <input type="radio" name="correct-option" value="0" required>
                     <input type="text" id="option1" placeholder="Option 1" required>
