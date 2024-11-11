@@ -22,12 +22,14 @@
 
         <!-- User Icon Circle -->
         <div class="user-icon" id="user-icon" onclick="showColorPicker()">
-            <span class="icon-text">U</span> <!-- Default icon text -->
+            <span class="icon-text" style="color: white;">U</span> <!-- Default icon text -->
         </div>
+        <div class="hover-text">Change icon color</div>
 
         <p><strong>Username:</strong> <span id="username">Loading...</span></p>
         <p><strong>Email:</strong> <span id="email">Loading...</span></p>
         <p><strong>Date of Birth:</strong> <span id="dob">Loading...</span></p>
+        <p><strong>Role:</strong> <span id="role">Loading...</span></p>
         <p><strong>Grade:</strong> <span id="grade">Loading...</span></p>
     </div>
 
@@ -77,6 +79,7 @@
                         document.getElementById("username").textContent = userData.username;
                         document.getElementById("email").textContent = userData.email;
                         document.getElementById("dob").textContent = userData.dateOfBirth || 'Not provided';
+                        document.getElementById("role").textContent = userData.role || 'Not specified'; // Display the role
                         document.getElementById("grade").textContent = userData.grade;
 
                         // Check if the color field exists, otherwise default to grey
@@ -93,6 +96,7 @@
                 window.location.href = "index.html";
             }
         });
+
 
         document.getElementById("logout-btn").addEventListener("click", () => {
             auth.signOut().then(() => {

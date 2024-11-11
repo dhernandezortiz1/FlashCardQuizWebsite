@@ -42,12 +42,11 @@ h3 {
     background-color: #0056b3;
 }
 
-/* Flashcard set list (Vertical layout for set buttons) */
+/* Flashcard set list container (Vertical layout for set buttons and delete buttons) */
 #flashcard-set-list {
     display: flex;
     flex-direction: column;
-    /* Make set buttons vertical */
-    gap: 0.75rem;
+    gap: 1rem;
     padding: 1rem;
     width: 90%;
     max-width: 600px;
@@ -57,8 +56,16 @@ h3 {
     margin-top: 20px;
 }
 
-/* Flashcard set buttons */
-#flashcard-set-list button {
+/* Flashcard set container (Wrapper for each set and delete button) */
+.set-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* Set button */
+.set-container button {
     padding: 1rem;
     background-color: #28a745;
     color: white;
@@ -69,10 +76,31 @@ h3 {
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease;
+    width: 85%;
+    height: 50px;
 }
 
-#flashcard-set-list button:hover {
+.set-container button:hover {
     background-color: #218838;
+}
+
+/* Delete button for admin users */
+.set-container .delete-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    height: 50px;
+    width: 100px;
+    /* Shorter length */
+}
+
+.set-container .delete-btn:hover {
+    background-color: darkred;
 }
 
 /* Flashcard layout */
@@ -140,6 +168,67 @@ h3 {
 
 #home-btn:hover {
     background-color: #0056b3;
+}
+
+/* Overall container for subject buttons */
+#subject-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+    width: 90%;
+    padding: 20px;
+}
+
+/* Container for the 2x3 grid of buttons */
+.subject-button-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    /* 3 equal-width columns */
+    grid-template-rows: 1fr 1fr;
+    /* 2 equal-height rows */
+    gap: 20px;
+    /* Space between the buttons */
+    width: 500px;
+    /* Adjust width for 3 columns */
+    height: 200px;
+    /* Adjust height for 2 rows */
+}
+
+/* Style for the buttons */
+#subject-list button {
+    padding: 20px;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    /* Make buttons fill their grid cells */
+    height: 100%;
+    /* Make buttons fill their grid cells */
+}
+
+/* Hover effect for buttons */
+#subject-list button:hover {
+    background-color: #45a049;
+}
+
+/* The "Other" button positioned in the 5th grid cell */
+#subject-list button:last-child {
+    grid-column: 3;
+    /* Position the "Other" button in the third column */
+    grid-row: 1;
+    /* Position the "Other" button in the first row */
+    height: 100%;
+    width: 100%;
 }
 
 /* Back Button */

@@ -15,6 +15,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-color: #f9f9f9;
     color: #333;
+    min-height: 400px;
 }
 
 .profile-container h2 {
@@ -45,27 +46,55 @@ body {
     float: right;
 }
 
-/* User Icon Circle */
+/* User Icon styling */
 .user-icon {
     width: 100px;
     height: 100px;
-    background-color: grey;
-    /* Default to grey */
-    color: white;
-    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 20px auto;
+    border-radius: 50%;
     font-size: 36px;
     font-weight: bold;
     cursor: pointer;
+    position: relative;
     transition: background-color 0.3s ease;
+    overflow: hidden;
+    /* Smooth color change */
 }
 
+/* Ensure text is vertically and horizontally centered */
+.user-icon .icon-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Hover effect for fading to light grey */
 .user-icon:hover {
-    opacity: 0.8;
-    /* Visual feedback when hovered */
+    background-color: lightgrey !important;
+}
+
+/* Hover text positioning */
+.hover-text {
+    display: none;
+    text-align: center;
+    color: black;
+    font-size: 14px;
+    margin-top: 8px;
+    position: absolute;
+    top: 100%;
+    /* Position it below the icon */
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    /* Spacing between icon and text */
+}
+
+/* Show hover text when hovering over the icon */
+.user-icon:hover .hover-text {
+    display: block;
 }
 
 /* Profile field styles */

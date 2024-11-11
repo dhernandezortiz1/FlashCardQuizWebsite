@@ -17,13 +17,20 @@
             <input type="email" id="email" placeholder="Email" required>
             <input type="password" id="password" placeholder="Password" required>
 
-            <!-- Separate fields for Date of Birth -->
             <div class="dob-container">
-                <label for="dob-month">Date of Birth:</label>
+                <label for="dob-month">DOB:</label>
                 <input type="number" id="dob-month" placeholder="MM" min="1" max="12" required>
                 <input type="number" id="dob-day" placeholder="DD" min="1" max="31" required>
                 <input type="number" id="dob-year" placeholder="YYYY" min="1900" max="2100" required>
             </div>
+
+            <select id="role" required>
+                <option value="">Select Role</option>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="business">Business</option>
+                <option value="self-study">Self Study</option>
+            </select>
 
             <select id="grade" required>
                 <option value="">Select Grade</option>
@@ -35,6 +42,7 @@
                 <option value="11">Grade 11</option>
                 <option value="12">Grade 12</option>
                 <option value="college">College/University</option>
+                <option value="other">Other</option>
             </select>
             <button type="submit">Register</button>
             <div id="error-message" class="error-message"></div>
@@ -70,6 +78,7 @@
             const year = document.getElementById("dob-year").value;
             const dob = `${month}-${day}-${year}`; // Combine month, day, and year into "MM-DD-YYYY"
             const grade = document.getElementById("grade").value;
+            const role = document.getElementById("role").value; // Get the selected role
             const errorMessage = document.getElementById("error-message");
 
             try {
@@ -81,6 +90,7 @@
                     email: email,
                     dateOfBirth: dob,
                     grade: grade,
+                    role: role
                 });
 
                 console.log("User data saved to Firestore");
@@ -91,6 +101,7 @@
                 errorMessage.textContent = "Error: " + error.message;
             }
         }
+
     </script>
 
 </body>
