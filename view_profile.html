@@ -31,6 +31,12 @@
         <p><strong>Date of Birth:</strong> <span id="dob">Loading...</span></p>
         <p><strong>Role:</strong> <span id="role">Loading...</span></p>
         <p><strong>Grade:</strong> <span id="grade">Loading...</span></p>
+
+        <!-- Quiz Scores Section -->
+        <div class="quiz-scores-container">
+            <h3>Quiz Scores</h3>
+            <div id="quiz-scores-list">Loading quiz scores...</div>
+        </div>
     </div>
 
     <!-- Color Picker Popup -->
@@ -85,6 +91,9 @@
                         // Check if the color field exists, otherwise default to grey
                         const userColor = userData.color || 'grey';
                         document.getElementById("user-icon").style.backgroundColor = userColor;
+
+                        // Load and display quiz scores
+                        loadQuizScores(user.uid);
                     } else {
                         console.error("No such user document!");
                     }
@@ -92,10 +101,122 @@
                     console.error("Error fetching user data:", error);
                 }
             } else {
-                alert("User not logged in.");
                 window.location.href = "index.html";
             }
         });
+
+        // Fetch and display quiz scores from Firestore
+        async function loadQuizScores(userId) {
+            const quizScoresList = document.getElementById('quiz-scores-list');
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                const userData = userDoc.data();
+                const takenQuizzes = userData?.takenQuizzes || {};
+
+                if (Object.keys(takenQuizzes).length === 0) {
+                    quizScoresList.innerHTML = "<p>No quiz scores available.</p>";
+                    return;
+                }
+
+                const scoresList = document.createElement('ul');
+                for (const [setId, scoreData] of Object.entries(takenQuizzes)) {
+                    const { subject, setName } = scoreData; // Assuming 'subject' and 'setName' are stored in scoreData
+
+                    console.log(`Fetching set: Subject: ${subject}, Set ID: ${setName}`); // Debugging log
+
+                    // Query the flashcardsets collection under the appropriate subject
+                    const setDoc = await db.collection("flashcardsets").doc(subject).collection("sets").doc(setName).get();
+
+                    console.log(`Set Document:`, setDoc.exists ? setDoc.data() : "No document found"); // Debugging log
+
+                    const setNameFromFirestore = setDoc.exists ? setDoc.data().name : "Unnamed Set"; // Get set name from Firestore
+
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${setNameFromFirestore} - High Score: ${scoreData.highScore}%`;
+                    scoresList.appendChild(listItem);
+                }
+
+                quizScoresList.innerHTML = '';
+                quizScoresList.appendChild(scoresList);
+
+            } catch (error) {
+                console.error("Error fetching quiz scores:", error);
+                quizScoresList.innerHTML = "<p>Error loading quiz scores.</p>";
+            }
+        }
+        // Fetch and display quiz scores from Firestore
+        async function loadQuizScores(userId) {
+            const quizScoresList = document.getElementById('quiz-scores-list');
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                const userData = userDoc.data();
+                const takenQuizzes = userData?.takenQuizzes || {};
+
+                if (Object.keys(takenQuizzes).length === 0) {
+                    quizScoresList.innerHTML = "<p>No quiz scores available.</p>";
+                    return;
+                }
+
+                const scoresList = document.createElement('ul');
+                for (const [setId, scoreData] of Object.entries(takenQuizzes)) {
+                    const { setName, highScore } = scoreData; // Destructure setName and highScore
+
+                    // Log the setId to check which quiz we're fetching
+                    console.log(`Fetching set: Set ID: ${setId}, Set Name: ${setName}`);
+
+                    if (!setName) {
+                        console.error(`Missing setName for setId: ${setId}`);
+                        continue; // Skip if setName is missing
+                    }
+
+                    // Now we know that setName exists, we need to find the subject
+                    // Check all predefined subjects in the flashcardsets collection
+                    const subjects = ['math', 'science', 'social studies', 'languages', 'other'];
+                    let subject = null;
+
+                    // Search through each subject to find the matching setName
+                    for (const subjectName of subjects) {
+                        const setDoc = await db.collection("flashcardsets")
+                            .doc(subjectName)
+                            .collection("sets")
+                            .doc(setName)
+                            .get();
+
+                        // If the set is found, assign the subject and break out of the loop
+                        if (setDoc.exists) {
+                            subject = subjectName;
+                            break;
+                        }
+                    }
+
+                    if (!subject) {
+                        console.error(`Set with ID ${setId} not found in any subject`);
+                        continue; // Skip if set is not found in any subject
+                    }
+
+                    // Fetch the set name from the Firestore document
+                    const setDoc = await db.collection("flashcardsets")
+                        .doc(subject)
+                        .collection("sets")
+                        .doc(setName)
+                        .get();
+
+                    const setNameFromFirestore = setDoc.exists ? setDoc.data().name : "Unnamed Set"; // Get set name
+
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${setNameFromFirestore} (${subject}) - High Score: ${highScore}%`;
+                    scoresList.appendChild(listItem);
+                }
+
+                quizScoresList.innerHTML = '';
+                quizScoresList.appendChild(scoresList);
+
+            } catch (error) {
+                console.error("Error fetching quiz scores:", error);
+                quizScoresList.innerHTML = "<p>Error loading quiz scores.</p>";
+            }
+        }
+
 
 
         document.getElementById("logout-btn").addEventListener("click", () => {

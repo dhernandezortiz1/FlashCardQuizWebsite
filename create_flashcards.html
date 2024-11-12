@@ -9,25 +9,29 @@
 </head>
 
 <body>
-
     <!-- Home button -->
     <a id="home-btn" href="home.html">Home</a>
 
     <h2 style="color: white;">Create a Flashcard Set</h2>
 
-    <form id="flashcard-set-form">
-        <label for="set-name" style="color: white;">Flashcard Set Name:</label>
-        <input type="text" id="set-name" placeholder="Enter set name" required>
+    <!-- Container for flashcard set name and subject menu -->
+    <div class="set-details-container">
+        <form id="flashcard-set-form">
+            <label for="set-name" style="color: black;">Flashcard Set Name:</label>
+            <input type="text" id="set-name" placeholder="Enter set name" required>
 
-        <label for="subject" style="color: white;">Subject:</label>
-        <select id="subject" required>
-            <option value="math">Math</option>
-            <option value="science">Science</option>
-            <option value="social studies">Social Studies</option>
-            <option value="languages">Languages</option>
-            <option value="other">Other</option>
-        </select>
+            <label for="subject" style="color: black;">Subject:</label>
+            <select id="subject" required>
+                <option value="math">Math</option>
+                <option value="science">Science</option>
+                <option value="social studies">Social Studies</option>
+                <option value="languages">Languages</option>
+                <option value="other">Other</option>
+            </select>
+        </form>
+    </div>
 
+    <form id="flashcard-form">
         <div class="flashcard-container">
             <div>
                 <label for="flashcard-front" style="color: black;">Flashcard Front:</label>
@@ -36,27 +40,33 @@
 
             <div>
                 <label style="color: black;">Flashcard Back (Multiple Choice):</label>
-                <div class="option-container">
-                    <input type="radio" name="correct-option" value="0" required>
-                    <input type="text" id="option1" placeholder="Option 1" required>
-                </div>
-                <div class="option-container">
-                    <input type="radio" name="correct-option" value="1">
-                    <input type="text" id="option2" placeholder="Option 2" required>
-                </div>
-                <div class="option-container">
-                    <input type="radio" name="correct-option" value="2">
-                    <input type="text" id="option3" placeholder="Option 3" required>
-                </div>
-                <div class="option-container">
-                    <input type="radio" name="correct-option" value="3">
-                    <input type="text" id="option4" placeholder="Option 4" required>
+                <div class="options-grid">
+                    <div class="option-container">
+                        <input type="radio" name="correct-option" value="0" required>
+                        <input type="text" id="option1" placeholder="Option 1" required>
+                    </div>
+                    <div class="option-container">
+                        <input type="radio" name="correct-option" value="1">
+                        <input type="text" id="option2" placeholder="Option 2" required>
+                    </div>
+                    <div class="option-container">
+                        <input type="radio" name="correct-option" value="2">
+                        <input type="text" id="option3" placeholder="Option 3" required>
+                    </div>
+                    <div class="option-container">
+                        <input type="radio" name="correct-option" value="3">
+                        <input type="text" id="option4" placeholder="Option 4" required>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <button type="button" onclick="addFlashcard()">Add Flashcard</button>
-        <button type="submit">Save Flashcard Set</button>
+        <!-- Container for action buttons -->
+        <div class="button-container">
+            <button type="button" onclick="addFlashcard()">Add Flashcard</button>
+            <!-- Make sure the button has the correct ID -->
+            <button type="button" id="save-flashcard-set" class="btn btn-primary">Save Flashcard Set</button>
+        </div>
     </form>
 
     <div id="flashcards-list"></div>
@@ -85,7 +95,7 @@
 
         let flashcards = [];
 
-        // Function to add flashcard to the list
+        // Function to add flashcard to the list (displayed on the UI)
         function addFlashcard() {
             const front = document.getElementById('flashcard-front').value;
             const option1 = document.getElementById('option1').value;
@@ -94,6 +104,16 @@
             const option4 = document.getElementById('option4').value;
             const correctOption = document.querySelector('input[name="correct-option"]:checked').value;
 
+            // Log the form data for debugging
+            console.log('Adding flashcard with data:', {
+                front,
+                option1,
+                option2,
+                option3,
+                option4,
+                correctOption
+            });
+
             // Construct flashcard object
             const flashcard = {
                 front: front,
@@ -101,15 +121,19 @@
                     { option: option1, isCorrect: correctOption == "0" },
                     { option: option2, isCorrect: correctOption == "1" },
                     { option: option3, isCorrect: correctOption == "2" },
-                    { option: option4, isCorrect: correctOption == "3" }
-                ]
+                    { option: option4, isCorrect: correctOption == "3" },
+                ],
+                likes: 0,  // Adding likes field
+                dislikes: 0  // Adding dislikes field
             };
 
+            // Add the flashcard to the list
             flashcards.push(flashcard);
 
+            // Display flashcards (on the page)
             displayFlashcards();
 
-            // Clear inputs for new flashcard entry
+            // Clear input fields
             document.getElementById('flashcard-front').value = '';
             document.getElementById('option1').value = '';
             document.getElementById('option2').value = '';
@@ -117,24 +141,21 @@
             document.getElementById('option4').value = '';
             document.querySelector('input[name="correct-option"]:checked').checked = false;
 
-            // Remove required attributes after the first flashcard is added
+            // After adding the first flashcard, remove "required" from fields
             if (flashcards.length > 0) {
                 document.getElementById('flashcard-front').removeAttribute('required');
                 document.getElementById('option1').removeAttribute('required');
                 document.getElementById('option2').removeAttribute('required');
                 document.getElementById('option3').removeAttribute('required');
                 document.getElementById('option4').removeAttribute('required');
-                const radioButtons = document.querySelectorAll('input[name="correct-option"]');
-                radioButtons.forEach(radio => {
-                    radio.removeAttribute('required');
-                });
+                document.querySelectorAll('input[name="correct-option"]').forEach((radio) => radio.removeAttribute('required'));
             }
         }
 
-        // Function to display added flashcards
+        // Function to display added flashcards (on the page)
         function displayFlashcards() {
             const flashcardsList = document.getElementById('flashcards-list');
-            flashcardsList.innerHTML = '';
+            flashcardsList.innerHTML = '';  // Clear previous list
 
             flashcards.forEach((flashcard, index) => {
                 const flashcardDiv = document.createElement('div');
@@ -153,54 +174,47 @@
             });
         }
 
-        // Event listener for form submission
-        document.getElementById('flashcard-set-form').addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent default form submission
+        // Event listener for saving flashcard set
+        document.getElementById('save-flashcard-set').addEventListener('click', async (e) => {
+            e.preventDefault();
 
             const setName = document.getElementById('set-name').value;
             const subject = document.getElementById('subject').value;
+            const user = firebase.auth().currentUser;
 
-            // Check if at least one flashcard has been added
-            if (flashcards.length === 0) {
-                alert('Please add at least one flashcard before saving.');
+            // Check if the set name and subject are provided
+            if (!setName || !subject) {
+                alert("Please provide a valid set name and subject.");
+                return;
+            }
+
+            // Check if at least one flashcard is added
+            if (!flashcards.length) {
+                alert("Please add at least one flashcard before saving.");
                 return;
             }
 
             try {
-                const user = auth.currentUser;
-                // Save flashcards under the chosen subject as a subcollection in 'flashcardsets'
-                await db.collection('flashcardsets')
-                    .doc(subject) // Each subject will be a document within 'flashcardsets'
-                    .collection('sets') // Subcollection under the subject document
-                    .add({
-                        name: setName || "Unnamed Set",
-                        creator: user.uid,
-                        flashcards: flashcards,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                // Attempt to save the flashcard set in Firestore
+                await db.collection('flashcardsets').doc(subject).collection('sets').add({
+                    name: setName,
+                    subject: subject,
+                    creator: user.uid,
+                    flashcards: flashcards,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                });
 
-                alert('Flashcard set created successfully!');
-                // Clear the form and flashcards list
-                document.getElementById('flashcard-set-form').reset();
-                flashcards = [];
-                displayFlashcards();
+                // Success message
+                alert('Flashcard set saved successfully!');
+                window.location.href = 'home.html'; // Redirect after successful save
             } catch (error) {
-                console.error("Error creating flashcard set: ", error);
-                alert('Error creating flashcard set. Please try again.');
+                // Error message
+                console.error("Error saving flashcard set: ", error);
+                alert("There was an error saving your flashcard set. Please try again.");
             }
         });
 
-        // Check if the user is logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // User is signed in
-            } else {
-                alert("User not logged in.");
-                window.location.href = "index.html"; // Redirect to login page
-            }
-        });
     </script>
-
 </body>
 
 </html>
