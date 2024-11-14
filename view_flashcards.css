@@ -78,6 +78,7 @@ h3 {
     transition: background-color 0.3s ease;
     width: 85%;
     height: 50px;
+    margin: 5px;
 }
 
 .set-container button:hover {
@@ -96,7 +97,6 @@ h3 {
     margin-left: 10px;
     height: 50px;
     width: 100px;
-    /* Shorter length */
 }
 
 .set-container .delete-btn:hover {
@@ -107,7 +107,7 @@ h3 {
 .flashcard {
     display: flex;
     justify-content: space-between;
-    background-color: #fff;
+    background-color: #494444;
     padding: 1rem;
     margin: 1rem 0;
     width: 800px;
@@ -122,21 +122,30 @@ h3 {
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 5px;
+    text-align: center;
 }
 
 .flashcard .front {
     font-weight: bold;
+    padding-top: 100px;
 }
 
 .flashcard .back .option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     padding: 0.5rem;
+    padding-top: 10px;
     margin: 0.5rem 0;
     border-radius: 4px;
     background-color: #f9f9f9;
 }
 
 .correct {
-    background-color: #d4edda !important;
+    background-color: #b6eac2 !important;
 }
 
 /* Set Info */
@@ -249,4 +258,50 @@ h3 {
 
 #back-btn:hover {
     background-color: #0056b3;
+}
+
+.styled-button {
+    background-color: #007bff;
+    /* Blue color */
+    color: white;
+    /* White text */
+    padding: 10px 15px;
+    /* Padding for size */
+    border: none;
+    /* No border */
+    border-radius: 12px;
+    /* Rounded edges */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+    font-size: 14px;
+    /* Font size */
+    margin: 5px;
+    /* Space between buttons */
+    transition: background-color 0.3s ease;
+    /* Smooth hover effect */
+}
+
+.styled-button:hover {
+    background-color: #0056b3;
+    /* Darker blue on hover */
+}
+
+.styled-button:disabled {
+    background-color: #cccccc;
+    /* Greyed out when disabled */
+    cursor: not-allowed;
+}
+
+#edit-btn {
+    padding: 10px 20px;
+    background-color: #ffc107;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#edit-btn:hover {
+    background-color: #e0a800;
 }

@@ -1,0 +1,155 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+    color: #333;
+}
+
+.container {
+    width: 50%;
+    /* Reduced the width of the main container */
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1,
+h2 {
+    color: #333;
+    text-align: center;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Flashcard Input Section */
+.flashcard {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    width: 95%;
+    margin: 10px auto;
+}
+
+.flashcard label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.flashcard input[type="text"] {
+    width: 80%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.flashcard input[type="text"]:focus {
+    outline-color: #007BFF;
+}
+
+/* Form and Save Button */
+#flashcardForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 90%;
+    /* Reduced width of the form */
+    margin: 0 auto;
+    /* Center the form */
+}
+
+#saveChangesButton {
+    margin-top: 20px;
+    align-self: center;
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto;
+    /* Adjusted width of the save button */
+}
+
+#saveChangesButton:hover {
+    background-color: #218838;
+}
+
+/* Back Button */
+#backButton {
+    margin-top: 20px;
+    font-size: 16px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto;
+    /* Adjusted width of the back button */
+}
+
+#backButton:hover {
+    background-color: #5a6268;
+}
+
+/* Error and Success Messages */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}

@@ -38,13 +38,16 @@
     <!-- Flashcard Set Details -->
     <div id="flashcard-details" style="display: none;">
         <div id="set-info">
-            <h3 id="set-name" style="color: white;"></h3>
+            <h2 id="set-name" style="color: white;"></h2>
             <p style="color: white;"><strong>Created by:</strong> <span id="creator-name"></span></p>
         </div>
 
         <div id="likes-dislikes" style="text-align: center;">
             <!-- Likes and Dislikes buttons will be inserted here -->
         </div>
+
+        <!--Edit Button-->
+        <button id="edit-btn" style="display: none;" onclick="redirectToEditPage()">Edit Flashcards</button>
 
         <div id="flashcards-container">
             <!-- Flashcards will be displayed here dynamically -->

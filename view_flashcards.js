@@ -75,6 +75,10 @@ async function loadFlashcardSetsBySubject(subject) {
     const flashcardSetList = document.getElementById('flashcard-set-list');
     const searchBar = document.getElementById('search-bar');
 
+    // Hide the edit button whenever a new subject is loaded
+    const editButton = document.getElementById('edit-btn');
+    editButton.style.display = 'none';  // Ensure the edit button is hidden when we load new sets
+
     flashcardSetList.innerHTML = '';
     document.getElementById('subject-list').style.display = 'none';
     flashcardSetList.style.display = 'block';
@@ -131,6 +135,16 @@ async function loadFlashcardSetsBySubject(subject) {
     }
 }
 
+// Display the edit button if the user is the creator
+function showEditButtonIfCreator(setCreatorUID, subject, setId) {
+    const currentUser = auth.currentUser;
+    if (currentUser && currentUser.uid === setCreatorUID) {
+        const editButton = document.getElementById('edit-btn');
+        editButton.style.display = 'inline-block'; // Display the edit button
+        editButton.onclick = () => redirectToEditPage(subject, setId); // Pass subject and setId
+    }
+}
+
 
 // Function to load the flashcard set details (including likes/dislikes)
 async function loadFlashcardSetDetails(subject, setId) {
@@ -151,24 +165,7 @@ async function loadFlashcardSetDetails(subject, setId) {
         if (setDoc.exists) {
             let setData = setDoc.data();
 
-            // Check and initialize fields if necessary
-            const fieldsToInitialize = {};
-
-            if (!setData.likes) {
-                fieldsToInitialize.likes = 0;
-            }
-            if (!setData.dislikes) {
-                fieldsToInitialize.dislikes = 0;
-            }
-            if (!setData.voters) {
-                fieldsToInitialize.voters = {};
-            }
-
-            if (Object.keys(fieldsToInitialize).length > 0) {
-                // If any fields are missing, update Firestore with default values
-                await setRef.update(fieldsToInitialize);
-                setData = { ...setData, ...fieldsToInitialize };  // Merge initialized fields into setData
-            }
+            showEditButtonIfCreator(setData.creator, subject, setId); // Pass subject and setId to showEditButtonIfCreator
 
             // Set the name and creator
             setNameElement.textContent = setData.name;
@@ -183,6 +180,7 @@ async function loadFlashcardSetDetails(subject, setId) {
                 // Create the like button
                 const likeButton = document.createElement('button');
                 likeButton.textContent = `Likes: ${setData.likes}`;
+                likeButton.classList.add('styled-button'); // Adding a CSS class
                 likeButton.onclick = () => handleVote('like', setId, userId, userVote, subject);
                 if (userVote === 'liked') {
                     likeButton.disabled = true; // Disable if user has already liked
@@ -192,6 +190,7 @@ async function loadFlashcardSetDetails(subject, setId) {
                 // Create the dislike button
                 const dislikeButton = document.createElement('button');
                 dislikeButton.textContent = `Dislikes: ${setData.dislikes}`;
+                dislikeButton.classList.add('styled-button'); // Adding a CSS class
                 dislikeButton.onclick = () => handleVote('dislike', setId, userId, userVote, subject);
                 if (userVote === 'disliked') {
                     dislikeButton.disabled = true; // Disable if user has already disliked
@@ -210,11 +209,11 @@ async function loadFlashcardSetDetails(subject, setId) {
 
                 const frontDiv = document.createElement('div');
                 frontDiv.classList.add('front');
-                frontDiv.innerHTML = `<strong>Front:</strong> ${flashcard.front}`;
+                frontDiv.innerHTML = ` ${flashcard.front}`;
 
                 const backDiv = document.createElement('div');
                 backDiv.classList.add('back');
-                backDiv.innerHTML = `<strong>Back (Options):</strong>`;
+                backDiv.innerHTML = ``;
 
                 flashcard.back.forEach((option) => {
                     const optionDiv = document.createElement('div');
@@ -238,6 +237,8 @@ async function loadFlashcardSetDetails(subject, setId) {
         console.error("Error loading flashcard set details:", error);
     }
 }
+
+
 async function handleVote(type, setId, userId, userVote, subject) {
     const setRef = db.collection('flashcardsets').doc(subject).collection('sets').doc(setId);
 
@@ -344,4 +345,13 @@ function showSubjects() {
     document.getElementById('back-btn').style.display = 'none';
     hideSearchBar();
     resetSubjectButtonLayout();  // Reset the layout of subject buttons
+}
+
+function redirectToEditPage(subject, setId) {
+    // Redirects the user to the edit page with necessary parameters
+    const queryParams = new URLSearchParams({
+        subject: subject, // Pass subject as a query parameter
+        setId: setId      // Pass setId as a query parameter
+    });
+    window.location.href = `edit_flashcards.html?${queryParams.toString()}`;
 }

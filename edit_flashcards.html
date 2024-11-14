@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Flashcards</title>
+    <link rel="stylesheet" href="edit_flashcards.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Displaying the set's name and subject, but these fields are not editable -->
+        <h2 id="setName"></h2>
+        <p id="setSubject"></p>
+
+        <!-- Flashcards container -->
+        <form id="flashcardForm">
+            <div id="flashcardsContainer">
+                <!-- Flashcards will be dynamically loaded here -->
+            </div>
+
+            <button type="submit" id="saveChangesButton">Save Changes</button>
+        </form>
+
+        <button id="backButton" onclick="goBack()">Back to Sets</button>
+    </div>
+
+    <!-- Firebase App and Firestore SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script src="edit_flashcards.js"></script> <!-- This will handle loading and saving flashcards -->
+
+</body>
+
+</html>
