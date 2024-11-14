@@ -95,33 +95,28 @@
 
         let flashcards = [];
 
-        // Function to add flashcard to the list (displayed on the UI)
         function addFlashcard() {
-            const front = document.getElementById('flashcard-front').value;
-            const option1 = document.getElementById('option1').value;
-            const option2 = document.getElementById('option2').value;
-            const option3 = document.getElementById('option3').value;
-            const option4 = document.getElementById('option4').value;
-            const correctOption = document.querySelector('input[name="correct-option"]:checked').value;
+            const front = document.getElementById('flashcard-front').value.trim();
+            const option1 = document.getElementById('option1').value.trim();
+            const option2 = document.getElementById('option2').value.trim();
+            const option3 = document.getElementById('option3').value.trim();
+            const option4 = document.getElementById('option4').value.trim();
+            const correctOption = document.querySelector('input[name="correct-option"]:checked');
 
-            // Log the form data for debugging
-            console.log('Adding flashcard with data:', {
-                front,
-                option1,
-                option2,
-                option3,
-                option4,
-                correctOption
-            });
+            // Validate that all fields are filled
+            if (!front || !option1 || !option2 || !option3 || !option4 || !correctOption) {
+                alert("Please fill in all fields and select a correct option before adding a flashcard.");
+                return;
+            }
 
             // Construct flashcard object
             const flashcard = {
                 front: front,
                 back: [
-                    { option: option1, isCorrect: correctOption == "0" },
-                    { option: option2, isCorrect: correctOption == "1" },
-                    { option: option3, isCorrect: correctOption == "2" },
-                    { option: option4, isCorrect: correctOption == "3" },
+                    { option: option1, isCorrect: correctOption.value == "0" },
+                    { option: option2, isCorrect: correctOption.value == "1" },
+                    { option: option3, isCorrect: correctOption.value == "2" },
+                    { option: option4, isCorrect: correctOption.value == "3" },
                 ],
                 likes: 0,  // Adding likes field
                 dislikes: 0  // Adding dislikes field
