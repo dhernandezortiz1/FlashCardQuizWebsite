@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin_dashboard.css">
+</head>
+
+<body>
+
+    <!-- Home button -->
+    <a id="home-btn" href="home.html">Home</a>
+
+    <!-- Logout button -->
+    <button id="logout-btn">Logout</button>
+
+    <!-- Admin Dashboard Container -->
+    <div class="admin-dashboard-container">
+        <h2 style="text-align: center;">Admin Dashboard</h2>
+        <p style="text-align: center;">Welcome, Admin! You can manage users, view stats, etc.</p>
+
+        <h3 style="text-align: center;">Users</h3>
+        <div class="users-section">
+            <div class="users-container">
+                <ul id="users-list" class="user-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <h3 style="text-align: center;">Reports</h3>
+    <div class="reports-section">
+        <ul id="reports-list" class="reports-list"></ul>
+    </div>
+
+
+    <!-- Confirmation Popup -->
+    <div id="confirmation-popup" class="hidden">
+        <div class="popup-content">
+            <p>Are you sure you want to delete this user?</p>
+            <button id="confirm-delete-btn">Confirm</button>
+            <button id="cancel-delete-btn">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Firebase App and Firestore SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxR-gB1srBMUlQNvwOy1M2fVHIKaClTZs",
+            authDomain: "sweflashcardwebsite.firebaseapp.com",
+            projectId: "sweflashcardwebsite",
+            storageBucket: "sweflashcardwebsite.appspot.com",
+            messagingSenderId: "1017040813605",
+            appId: "1:1017040813605:web:fe254a4afe244d341909cc",
+            measurementId: "G-NHEQY035NK"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const usersList = document.getElementById("users-list");
+        const confirmationPopup = document.getElementById("confirmation-popup");
+        const confirmDeleteBtn = document.getElementById("confirm-delete-btn");
+        const cancelDeleteBtn = document.getElementById("cancel-delete-btn");
+        let selectedUserId = null; // To store the ID of the user to delete
+
+        // Logout functionality
+        document.getElementById("logout-btn").addEventListener("click", () => {
+            auth.signOut().then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                console.error("Error signing out:", error);
+            });
+        });
+
+        function fetchUsers() {
+            db.collection("users").get()
+                .then(snapshot => {
+                    snapshot.forEach(doc => {
+                        const user = doc.data(); // Extract user data from Firestore
+                        console.log(user); // Debugging: Ensure users are logged correctly
+
+                        if (user && user.username && user.email) {
+                            const listItem = document.createElement("li");
+                            listItem.textContent = `${user.username} (${user.email})`; // Display username and email
+                            listItem.classList.add("user-item"); // Add class for styling
+                            listItem.dataset.userId = doc.id; // Store Firestore user ID
+                            usersList.appendChild(listItem);
+                        }
+                    });
+
+                    // Add event listeners to enable hover and click functionality
+                    document.querySelectorAll(".user-item").forEach(item => {
+                        item.addEventListener("click", () => {
+                            showConfirmationPopup(item.dataset.userId);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching users:", error);
+                });
+        }
+
+        function deleteUser(userId) {
+            db.collection("users").doc(userId).delete()
+                .then(() => {
+                    console.log("User deleted successfully");
+                    // Optionally, refresh the list after deletion
+                    usersList.innerHTML = ""; // Clear the list
+                    fetchUsers(); // Fetch the updated list
+                })
+                .catch(error => {
+                    console.error("Error deleting user:", error);
+                });
+        }
+
+        function fetchReports() {
+            const reportsList = document.getElementById("reports-list");
+
+            if (!reportsList) {
+                console.error("Element with ID 'reports-list' not found.");
+                return;
+            }
+
+            console.log("Attempting to fetch reports...");
+
+            db.collection("reports").get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        console.warn("No reports found in Firestore.");
+                        reportsList.innerHTML = "<li>No reports available</li>";
+                        return;
+                    }
+
+                    // Clear the list to prevent duplicates
+                    reportsList.innerHTML = "";
+
+                    snapshot.forEach(doc => {
+                        const report = doc.data();
+                        console.log("Fetched report:", report);
+
+                        const { title, description, submittedBy, submittedAt } = report;
+
+                        if (title && description && submittedBy && submittedAt) {
+                            // Fetch the username from the "users" collection
+                            db.collection("users").doc(submittedBy).get()
+                                .then(userDoc => {
+                                    const user = userDoc.data();
+                                    const username = user ? user.username : "Unknown User";
+
+                                    // Format the date
+                                    const formattedDate = submittedAt.toDate().toLocaleDateString("en-US", {
+                                        month: "long",
+                                        day: "numeric",
+                                        year: "numeric"
+                                    });
+
+                                    const listItem = document.createElement("li");
+
+                                    // Create the report content
+                                    listItem.innerHTML = `
+                                <strong>Title:</strong> ${title}<br>
+                                <strong>Description:</strong> ${description}<br>
+                                <strong>Submitted By:</strong> ${username}<br>
+                                <strong>Submitted At:</strong> ${formattedDate}
+                            `;
+                                    listItem.classList.add("report-item");
+                                    reportsList.appendChild(listItem);
+                                })
+                                .catch(error => {
+                                    console.error(`Error fetching user with ID ${submittedBy}:`, error);
+                                });
+                        } else {
+                            console.warn("Incomplete report data:", report);
+                        }
+                    });
+
+                    console.log("Reports fetched successfully.");
+                })
+                .catch(error => {
+                    console.error("Error fetching reports from Firestore:", error);
+                });
+        }
+
+        // Fetch reports on page load
+        fetchReports();
+
+        function showConfirmationPopup(userId) {
+            const confirm = window.confirm("Do you really want to delete this user?");
+            if (confirm) {
+                deleteUser(userId);
+            }
+        }
+
+        // Close the confirmation popup
+        function closeConfirmationPopup() {
+            confirmationPopup.classList.add("hidden");
+            selectedUserId = null;
+        }
+
+        // Confirm deletion of the user
+        confirmDeleteBtn.addEventListener("click", () => {
+            if (selectedUserId) {
+                db.collection("users").doc(selectedUserId).delete()
+                    .then(() => {
+                        alert("User deleted successfully!");
+                        // Remove the user from the list without reloading
+                        document.querySelector(`[data-user-id='${selectedUserId}']`).remove();
+                    })
+                    .catch(error => {
+                        console.error("Error deleting user:", error);
+                    });
+            }
+            closeConfirmationPopup();
+        });
+
+        // Cancel deletion
+        cancelDeleteBtn.addEventListener("click", closeConfirmationPopup);
+
+        // Fetch users on page load
+        fetchUsers();
+
+    </script>
+
+</body>
+
+</html>

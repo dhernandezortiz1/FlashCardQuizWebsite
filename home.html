@@ -39,6 +39,29 @@
         <button class="profile-btn" onclick="window.location.href='view_profile.html'">View Profile</button>
     </div>
 
+    <!-- Report Button -->
+    <div class="report-container">
+        <button id="report-btn">Report</button>
+    </div>
+
+    <!-- Report Popup Modal -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-modal">&times;</span>
+            <h2>Submit a Report</h2>
+            <form id="report-form">
+                <label for="report-title">Title:</label>
+                <input type="text" id="report-title" name="report-title" placeholder="Enter report title" required>
+
+                <label for="report-description">Description:</label>
+                <textarea id="report-description" name="report-description" rows="5" placeholder="Describe the issue"
+                    required></textarea>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Firebase App and Auth SDKs (non-modular) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -101,6 +124,59 @@
                 console.error("Error during logout:", error);
             });
         }
+
+        // Open and close the modal
+        const reportBtn = document.getElementById("report-btn");
+        const reportModal = document.getElementById("report-modal");
+        const closeModal = document.getElementById("close-modal");
+        const reportForm = document.getElementById("report-form");
+
+        reportBtn.addEventListener("click", () => {
+            reportModal.style.display = "flex"; // Show modal
+        });
+
+        closeModal.addEventListener("click", () => {
+            reportModal.style.display = "none"; // Hide modal
+        });
+
+        window.addEventListener("click", (event) => {
+            if (event.target === reportModal) {
+                reportModal.style.display = "none"; // Close modal if user clicks outside
+            }
+        });
+
+        // Submit the report form
+        reportForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const title = document.getElementById("report-title").value;
+            const description = document.getElementById("report-description").value;
+
+            const user = auth.currentUser;
+
+            if (user) {
+                const reportData = {
+                    title,
+                    description,
+                    submittedBy: user.uid,
+                    email: user.email,
+                    submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                };
+
+                try {
+                    await db.collection("reports").add(reportData);
+                    alert("Report submitted successfully!");
+                    reportModal.style.display = "none"; // Close the modal
+                    reportForm.reset(); // Reset the form
+                } catch (error) {
+                    console.error("Error submitting report:", error);
+                    alert("Failed to submit report. Please try again.");
+                }
+            } else {
+                alert("You must be logged in to submit a report.");
+            }
+        });
+
     </script>
 
 </body>

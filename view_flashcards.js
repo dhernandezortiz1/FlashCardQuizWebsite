@@ -175,14 +175,20 @@ async function loadFlashcardSetDetails(subject, setId) {
             const currentUser = auth.currentUser;
             if (currentUser) {
                 const userId = currentUser.uid;
-                const userVote = setData.voters[userId] || null; // Get current user's vote status
+                let voters = setData.voters || {}; // Ensure voters exists
+                // If a user hasn't voted yet, initialize their vote to 0
+                if (!(userId in voters)) {
+                    voters[userId] = 0;
+                }
+
+                const userVote = voters[userId]; // Get user's vote status (0 = no vote, 1 = liked, -1 = disliked)
 
                 // Create the like button
                 const likeButton = document.createElement('button');
                 likeButton.textContent = `Likes: ${setData.likes}`;
                 likeButton.classList.add('styled-button'); // Adding a CSS class
                 likeButton.onclick = () => handleVote('like', setId, userId, userVote, subject);
-                if (userVote === 'liked') {
+                if (userVote === 1) {
                     likeButton.disabled = true; // Disable if user has already liked
                 }
                 likesDislikesDiv.appendChild(likeButton);
@@ -192,7 +198,7 @@ async function loadFlashcardSetDetails(subject, setId) {
                 dislikeButton.textContent = `Dislikes: ${setData.dislikes}`;
                 dislikeButton.classList.add('styled-button'); // Adding a CSS class
                 dislikeButton.onclick = () => handleVote('dislike', setId, userId, userVote, subject);
-                if (userVote === 'disliked') {
+                if (userVote === -1) {
                     dislikeButton.disabled = true; // Disable if user has already disliked
                 }
                 likesDislikesDiv.appendChild(dislikeButton);

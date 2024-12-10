@@ -39,6 +39,13 @@
         </div>
     </div>
 
+    <a href="https://kswork2001.github.io/minebyte"><button id="minebtn">MineByte Progress</button></a>
+
+    <!-- Admin Dashboard Button (hidden by default) -->
+    <a href="admin_dashboard.html">
+        <button id="admin-dashboard-btn" style="display: none;">Admin Dashboard</button>
+    </a>
+
     <!-- Color Picker Popup -->
     <div id="color-picker" class="color-picker-popup">
         <h3 style="color: black;">Change icon color</h3>
@@ -88,6 +95,11 @@
                         document.getElementById("role").textContent = userData.role || 'Not specified'; // Display the role
                         document.getElementById("grade").textContent = userData.grade;
 
+                        // Check if the user is an admin and show the admin dashboard button
+                        if (userData.role === "admin") {
+                            document.getElementById("admin-dashboard-btn").style.display = "inline-block"; // Show button
+                        }
+
                         // Check if the color field exists, otherwise default to grey
                         const userColor = userData.color || 'grey';
                         document.getElementById("user-icon").style.backgroundColor = userColor;
@@ -118,50 +130,16 @@
                     return;
                 }
 
+                // Create an unordered list for the quiz scores
                 const scoresList = document.createElement('ul');
-                for (const [setId, scoreData] of Object.entries(takenQuizzes)) {
-                    const { subject, setName } = scoreData; // Assuming 'subject' and 'setName' are stored in scoreData
 
-                    console.log(`Fetching set: Subject: ${subject}, Set ID: ${setName}`); // Debugging log
+                // Define subjects to check
+                const subjects = ['math', 'science', 'social studies', 'languages', 'other'];
 
-                    // Query the flashcardsets collection under the appropriate subject
-                    const setDoc = await db.collection("flashcardsets").doc(subject).collection("sets").doc(setName).get();
-
-                    console.log(`Set Document:`, setDoc.exists ? setDoc.data() : "No document found"); // Debugging log
-
-                    const setNameFromFirestore = setDoc.exists ? setDoc.data().name : "Unnamed Set"; // Get set name from Firestore
-
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${setNameFromFirestore} - High Score: ${scoreData.highScore}%`;
-                    scoresList.appendChild(listItem);
-                }
-
-                quizScoresList.innerHTML = '';
-                quizScoresList.appendChild(scoresList);
-
-            } catch (error) {
-                console.error("Error fetching quiz scores:", error);
-                quizScoresList.innerHTML = "<p>Error loading quiz scores.</p>";
-            }
-        }
-        // Fetch and display quiz scores from Firestore
-        async function loadQuizScores(userId) {
-            const quizScoresList = document.getElementById('quiz-scores-list');
-            try {
-                const userDoc = await db.collection('users').doc(userId).get();
-                const userData = userDoc.data();
-                const takenQuizzes = userData?.takenQuizzes || {};
-
-                if (Object.keys(takenQuizzes).length === 0) {
-                    quizScoresList.innerHTML = "<p>No quiz scores available.</p>";
-                    return;
-                }
-
-                const scoresList = document.createElement('ul');
                 for (const [setId, scoreData] of Object.entries(takenQuizzes)) {
                     const { setName, highScore } = scoreData; // Destructure setName and highScore
 
-                    // Log the setId to check which quiz we're fetching
+                    // Log to check which quiz we're fetching
                     console.log(`Fetching set: Set ID: ${setId}, Set Name: ${setName}`);
 
                     if (!setName) {
@@ -169,9 +147,6 @@
                         continue; // Skip if setName is missing
                     }
 
-                    // Now we know that setName exists, we need to find the subject
-                    // Check all predefined subjects in the flashcardsets collection
-                    const subjects = ['math', 'science', 'social studies', 'languages', 'other'];
                     let subject = null;
 
                     // Search through each subject to find the matching setName
@@ -203,12 +178,13 @@
 
                     const setNameFromFirestore = setDoc.exists ? setDoc.data().name : "Unnamed Set"; // Get set name
 
+                    // Create list item for quiz score
                     const listItem = document.createElement('li');
                     listItem.textContent = `${setNameFromFirestore} (${subject}) - High Score: ${highScore}%`;
                     scoresList.appendChild(listItem);
                 }
 
-                quizScoresList.innerHTML = '';
+                quizScoresList.innerHTML = '';  // Clear loading message
                 quizScoresList.appendChild(scoresList);
 
             } catch (error) {
@@ -216,8 +192,6 @@
                 quizScoresList.innerHTML = "<p>Error loading quiz scores.</p>";
             }
         }
-
-
 
         document.getElementById("logout-btn").addEventListener("click", () => {
             auth.signOut().then(() => {
@@ -243,13 +217,7 @@
             // Get the current user and update their color in Firestore
             const user = auth.currentUser;
             if (user) {
-                db.collection("users").doc(user.uid).update({
-                    color: color
-                }).then(() => {
-                    console.log("User color updated to:", color);
-                }).catch((error) => {
-                    console.error("Error updating user color:", error);
-                });
+                db.collection("users").doc(user.uid).update({ color: color });
             }
         }
     </script>
